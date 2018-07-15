@@ -73,6 +73,8 @@ def downloadMassDns():
     print "\033[1;32m[+]Downloading Massdns\033[1;m"
     try:
         proc = subprocess.Popen(config.downloadMassDns, stdout=subprocess.PIPE, shell=True).wait()
+	if proc != 0:
+		return
     except Exception as e:
         print "\033[1;31m[-]Exception: Unable to install MassDNS\033[1;m" + str(e)
     #Now, compile MassDNS
@@ -124,10 +126,12 @@ def createIPListFromMassDnsFilteredList(target):
 def downloadMasscan():
     print "\033[1;32m[+]Downloading Masscan\033[1;m"
     try:
-        proc = subprocess.Popen(config.installLibPcap, stdout=subprocess.PIPE, shell=True).wait()
+        print "\033[1;32m[+]Updating LibPcap\033[1;m"
+        #proc = subprocess.Popen(config.installLibPcap, stdout=subprocess.PIPE, shell=True).wait()
     except Exception as e:
         print "\033[1;31m[-]Exception: Unable to install LibPcap\033[1;m" + str(e)
     try:
+        print "\033[1;32m[+]Cloning Masscan\033[1;m"
         proc = subprocess.Popen(config.cloneMasscan, stdout=subprocess.PIPE, shell=True).wait()
     except Exception as e:
         print "\033[1;31m[-]Exception: Unable to clone Masscan\033[1;m" + str(e)
@@ -138,12 +142,46 @@ def downloadMasscan():
     except Exception as e:
         print "\033[1;31m[-]Exception: Unable to Make Masscan\033[1;m" + str(e)
 
+def downloadEyeWitness():
+    print "\033[1;32m[+]Downloading EyeWitness\033[1;m"
+    try:
+        print "\033[1;32m[+]Cloning EyeWitness\033[1;m"
+        proc = subprocess.Popen(config.downloadEyeWitness, stdout=subprocess.PIPE, shell=True).wait()
+    except Exception as e:
+        print "\033[1;31m[-]Exception: Unable to clone Masscan\033[1;m" + str(e)
+    # Now, run Setup Script inside EyeWitness
+    print "\033[1;32m[+]Setting up EyeWitness\033[1;m"
+    try:
+        proc = subprocess.Popen(config.setupEyeWitness, stdout=subprocess.PIPE, shell=True).wait()
+    except Exception as e:
+        print "\033[1;31m[-]Exception: Unable to Setup EyeWitness\033[1;m" + str(e)
+
+def performEyeWitness(target):
+    print "\033[1;32m[+]Initiating EyeWitness\033[1;m"
+    cmd = './EyeWitness/EyeWitness.py --headless  -f gov.pk.subfinder -d ' + target +".EyeWitness"
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()
+    print "\033[1;32m[+]EyeWitness Process Completed\033[1;m"
+
+
 #FINAL step, Deleting all the files created in the current directory after Making a Final Report
 def deleteTempReports():
     print "\033[1;31m[-]Deleting Temporary Reports\033[1;m"
     cmd = 'rm -rf ' + target + "*"
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     print "\033[1;31m[-]TEMPORARY REPORTS DELETED\033[1;m"
+
+def copyAllReports():
+    print "\033[1;31m[-]Arranging Reports\033[1;m"
+    cmd = 'mkdir ' + 'reports.' + target + "; cp -r " + target + ".* " + " reports." + target +"/"
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    print "\033[1;31m[-]TEMPORARY REPORTS DELETED\033[1;m"
+
+
+
+
+
+
+
 
 
 
@@ -175,7 +213,13 @@ else:
 
 
 #2. Check if subfinder is installed, else install it
-proc = subprocess.Popen(config.checkSubfinderIsPresent, stdout=subprocess.PIPE, shell = True)
+proc = subprocess.Popen('echo $USER', stdout=subprocess.PIPE, shell=True)
+if "root" in proc.stdout.read():
+	proc = subprocess.Popen(config.checkSubfinderIsPresentAsRoot, stdout=subprocess.PIPE, shell = True)
+	output = proc.stdout.read()
+else:
+	proc = subprocess.Popen(config.checkSubfinderIsPresent, stdout=subprocess.PIPE, shell = True)
+	output = proc.stdout.read()
 subfinderInstalled = False
 if output == "":
     print "\033[1;32m[+]Installing Subfinder\033[1;m"
@@ -189,7 +233,7 @@ else:
     setGoBuildPath()
 
 #TODO later set from OptParse
-target = "gov.pk"
+target = sys.argv[1]
 
 #perform subfinder enumeration on the given domain
 subfinderScan(target)
@@ -210,6 +254,7 @@ createIPListFromMassDnsFilteredList(target)
 
 #Port Scan the IP List using Masscan
 #Check if Masscan is installed, if not install it
+
 if not "masscan" in os.listdir('.'):
     print "\033[1;32m[+]Installing Masscan\033[1;m"
     #Call function to install massdns
@@ -226,7 +271,14 @@ print "\033[1;32m[+]Masscan Completed\033[1;m"
 
 #Perform Eyewitness on Domain lists
 #Check if Eyewitness is installed, if not install it
+if not "EyeWitness" in os.listdir('.'):
+    print "\033[1;32m[+]Installing EyeWitness\033[1;m"
+    #Call function to install massdns
+    downloadEyeWitness()
+else:
+    print "\033[1;32m[+]Found EyeWitness\033[1;m"
 
+performEyeWitness(target)
 
 
 
@@ -234,4 +286,5 @@ print "\033[1;32m[+]Masscan Completed\033[1;m"
 
 #FINAL STEP DELETE TEMPORARY Reports
 #TODO UNCOMMENT
-#deleteTempReports()
+copyAllReports()
+deleteTempReports()

@@ -5,6 +5,7 @@ checkGoVersion = '/usr/local/go/bin/go version'
 removeGoPackage = 'rm -rf go; rm -rf go1.10.3.linux-amd64.tar.gz'
 setGoPath = 'export PATH="$PATH:/usr/local/go/bin/"'
 setGoBuildPath = 'export PATH="$PATH:/home/$USER/go/bin/"'
+checkSubfinderIsPresentAsRoot = '/root/go/bin/subfinder'
 checkSubfinderIsPresent = '/home/$USER/go/bin/subfinder'
 subfinderDownloadAndBuildCommand = '/usr/local/go/bin/go get github.com/subfinder/subfinder'
 getUserName = 'echo $USER'
@@ -13,6 +14,8 @@ compileMassDns = 'cd massdns/;make;cd ..;'
 installLibPcap = 'sudo apt-get install git gcc make libpcap-dev'
 cloneMasscan = 'git clone https://github.com/robertdavidgraham/masscan'
 compileMasscan = 'cd masscan; make; cd ..;'
+downloadEyeWitness = 'git clone https://github.com/FortyNorthSecurity/EyeWitness.git'
+setupEyeWitness = './EyeWitness/setup/setup.sh'
 
 
 """
