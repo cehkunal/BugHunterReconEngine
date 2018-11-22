@@ -158,7 +158,7 @@ def downloadEyeWitness():
 
 def performEyeWitness(target):
     print "\033[1;32m[+]Initiating EyeWitness\033[1;m"
-    cmd = './EyeWitness/EyeWitness.py --headless  -f gov.pk.subfinder -d ' + target +".EyeWitness"
+    cmd = './EyeWitness/EyeWitness.py --headless  -f ' + target + '.subfinder -d ' + target +".EyeWitness"
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()
     print "\033[1;32m[+]EyeWitness Process Completed\033[1;m"
 
@@ -286,5 +286,5 @@ performEyeWitness(target)
 
 #FINAL STEP DELETE TEMPORARY Reports
 #TODO UNCOMMENT
-copyAllReports()
-deleteTempReports()
+#copyAllReports()
+#deleteTempReports()
